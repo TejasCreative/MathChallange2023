@@ -183,9 +183,31 @@ struct matrix{
             std::cout << "\n";
         }
         for(int i=0;i<choices.size();i++){
-            std::cout << choices[i] << " | ";
+            std::cout << choices[i] << "\n";
         }
         std::cout << start << '\n' << end << "\n";
+
+
+
+    }
+    void writeChoices(std::string filename){
+        std::ofstream mf;
+        mf.open(filename);
+        for(int i=0;i<choices.size();i++){
+            mf << choices[i] << "\n";
+        }
+        mf.close();
+    }
+    void writeMap(std::string filename){
+        std::ofstream mf;
+        mf.open(filename);
+        for(int r=0;r<rows;r++){
+            for(int c=0;c<cols;c++){
+                mf << info[r][c].letter;
+            }
+            mf << "\n";
+        }
+        mf.close();
     }
     ~matrix(){
         for(int i=0;i<rows;i++){
