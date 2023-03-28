@@ -194,4 +194,6 @@ struct matrix{
         delete[] info;
     }
 };
+
+
 #endif
