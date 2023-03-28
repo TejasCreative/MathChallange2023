@@ -16,6 +16,7 @@ struct matrix{
     node** info;
     std::vector<node> choices;
     std::vector<coord> shift;
+    std::vector<node> portals;
     matrix(){
         rows=0;
         cols=0;
@@ -24,6 +25,14 @@ struct matrix{
         shift.emplace_back(0,1,0);
         shift.emplace_back(1,0,0);
         shift.emplace_back(0,-1,0);
+    }
+    void linkPortals(node& n){
+        for(int i=0;i<portals.size();i++){
+            if(portals[i].letter==n.letter){
+                portals[i].edges.push_back(n.pos);
+                n.edges.push_back(portals[i].pos);
+            }
+        }
     }
     void generate2d(std::string filename){
         std::ifstream mf;
@@ -57,6 +66,17 @@ struct matrix{
                     end.pos.row = row;
                     end.pos.col = col;
                 }
+                else if((int)line[col]>65 && (int)line[col]<90){
+                    if(((int)data[row-1][col].letter>65 && (int)data[row-1][col].letter<90) || ((int)data[row][col-1].letter>65 && (int)data[row][col-1].letter<90)){
+                        line[col]='p';
+                    }
+                    else{
+                        node portal(row,col,0,line[col]);
+                        linkPortals(portal);
+                        portals.push_back(portal);
+                        line[col]='P';
+                    }
+                }
                 data[row][col].letter = line[col];
                 data[row][col].pos.row = row;
                 data[row][col].pos.col = col;
@@ -73,10 +93,18 @@ struct matrix{
         }
         return info[0][0];
     }
-    int countDots(coord curr){
+    int countOptions(coord curr){
         int n=0;
+        char l;
+        if(at(curr).letter=='P'){
+            n++;
+        }
         for(int i=0;i<4;i++){
-            if(at(curr+shift[i]).letter=='.'){
+            l = at(curr+shift[i]).letter;
+            if(l=='p'){
+                l=at(curr+shift[i]+shift[i]).letter;
+            }
+            if(l=='.' || l=='P'){
                 n++;
             }
         }
@@ -90,6 +118,14 @@ struct matrix{
         }
         return true;
     }
+    coord searchPortals(coord current,int whichPortal=0){
+        for(int i=0;i<portals.size();i++){
+            if(portals[i].pos == current){
+                return portals[i].edges[whichPortal];
+            }
+        }
+        return current;
+    }
     void findChoices(){
         std::vector<coord> lasts; 
         choices.push_back(start);
@@ -98,21 +134,38 @@ struct matrix{
         node next;
         int front=0;
         int distance=0;
-        std::string test;
         int choiceDirection =0;
-        //check cardinal directions, NESW
-        while(front!=choices.size()){
+        while(front<=choices.size()){//check cardinal directions, NESW
+            if(front==choices.size()){
+                if(noDuplicates(end.pos)){
+                    choices.push_back(end);
+                    lasts.push_back(end.pos);
+                }
+                else{
+                    break;
+                }
+            }
             current = choices[front].pos;
-            //create a new list that stores last that updates for each new choice
             last = lasts[front];
             int i=choiceDirection;
-            while(i<4){
-                next = at(current+shift[i]);
-                // std::cout << "\ni: " << i << "\ncurrent: " << current << "\nnext: " << next << "\ncd: " << choiceDirection << "\nAck: ";
-                if(next.letter=='.' && !(next.pos==last)){
+            while(i<5){
+                if(i==4){
+                    if(at(current).letter=='P'){
+                        next = at(searchPortals(current));
+                    }
+                    else{
+                        break;
+                    }
+                }
+                else{
+                    next = at(current+shift[i]);
+                    if(next.letter=='p'){
+                        next = at(next.pos+shift[i]);
+                    }
+                }
+                if((next.letter=='.' || next.letter=='P')&& !(next.pos==last)){
                     distance++;
-                    if(countDots(next.pos)>2){//found a choice node
-                        // std::cout << "new choice\n";
+                    if(countOptions(next.pos)>2){//found a choice node
                         distance = 0;
                         next.pos.dist=distance;
                         choices[front].edges.push_back(next.pos);
@@ -122,41 +175,22 @@ struct matrix{
                             choices.push_back(next);
                             lasts.push_back(current);
                         }
-                        // for(int q=0;q<choices.size();q++){
-                        //     std::cout<<choices[q].pos << " | ";
-                        // }
-                        // std::cout << "\n";
-                        // for(int q=0;q<lasts.size();q++){
-                        //     std::cout<<lasts[q] << " | ";
-                        // }
-                        // std::cout << "\n";
-                        // std::cin >> test;
                         break;
                     }
-                    else if(countDots(next.pos)==2){
-                        // std::cout << "continuing\n";
+                    else if(countOptions(next.pos)==2){//only one option to continue
                         last = current;
                         current = next.pos;
                         i=0;
                         continue;
                     }
                     else{// < 2 dead end so reset to last choice currently exploring
-                        // std::cout << "dead end\n";
                         current = choices[front].pos;
                         last = lasts[front];
                         break;
                     }
                 }
-                else{
-                    // if(next.letter==' '){
-                    //     std::cout<< "not a path\n";
-                    // }
-                    // else{
-                    //     std::cout<<"came from there\n";
-                    // }
-                    if(current==choices[front].pos){
-                        break;
-                    }
+                else if(current==choices[front].pos){
+                    break;
                 }
                 i++;
             }
@@ -166,35 +200,31 @@ struct matrix{
                 choiceDirection=0;
             }
         }
-        for(int j=0;j<choices.size();j++){
+        //label choice nodes with 0
+        at(choices.front().pos).letter='A';
+        at(choices.back().pos).letter='Z';
+        for(int j=1;j<choices.size()-1;j++){
             at(choices[j].pos).letter = '0';
         }
-        //fixify end cords
-        //include portal connections
+        //label portal pairs
+        for(int j=0;j<portals.size();j++){
+            at(portals[j].pos).letter = (char)(66+j);
+            at(portals[j].edges[0]).letter = (char)(66+j);
+        }
     }
     node& operator()(int row, int col){
         return info[row][col];
     }
-    void print(){
-        for(int r=0;r<rows;r++){
-            for(int c=0;c<cols;c++){
-                std::cout << info[r][c].letter;
-            }
-            std::cout << "\n";
-        }
-        for(int i=0;i<choices.size();i++){
-            std::cout << choices[i] << "\n";
-        }
-        std::cout << start << '\n' << end << "\n";
-
-
-
-    }
-    void writeChoices(std::string filename){
+    void writeNodes(std::string filename){
         std::ofstream mf;
         mf.open(filename);
+        mf << "Choices:\n";
         for(int i=0;i<choices.size();i++){
             mf << choices[i] << "\n";
+        }
+        mf << "\nPortals:\n";
+        for(int i=0;i<portals.size();i++){
+            mf << portals[i] << "\n";
         }
         mf.close();
     }

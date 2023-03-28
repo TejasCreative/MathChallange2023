@@ -5,8 +5,7 @@ int main(){
     matrix data;
     data.generate2d("AM_Challenge_packet_participant/AM_challenge23_input.txt");
     data.findChoices();
-    data.print();
-    data.writeChoices("matrix.txt");
+    data.writeNodes("matrix.txt");
     data.writeMap("map.txt");
     return 0;
 }

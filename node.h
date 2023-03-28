@@ -40,6 +40,15 @@ class node{
             letter =l;
             pos = p;
         }
+        node(int r, int c, int d, char l){
+            pos.row = r;
+            pos.col = c;
+            pos.dist = d;
+            letter =l;
+        }
+        bool operator==(const node other){
+            return pos==other.pos && letter==other.letter;
+        }
         friend std::ostream& operator<<(std::ostream& os, node n){
             os << n.pos << " | ";
             for(int i=0;i<n.edges.size();i++){
