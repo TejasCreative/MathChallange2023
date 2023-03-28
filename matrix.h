@@ -133,7 +133,7 @@ struct matrix{
         coord current, last;
         node next;
         int front=0;
-        int distance=0;
+        int distance;
         int choiceDirection =0;
         while(front<=choices.size()){//check cardinal directions, NESW
             if(front==choices.size()){
@@ -148,6 +148,7 @@ struct matrix{
             current = choices[front].pos;
             last = lasts[front];
             int i=choiceDirection;
+            distance=0;
             while(i<5){
                 if(i==4){
                     if(at(current).letter=='P'){
@@ -166,11 +167,8 @@ struct matrix{
                 if((next.letter=='.' || next.letter=='P')&& !(next.pos==last)){
                     distance++;
                     if(countOptions(next.pos)>2){//found a choice node
-                        distance = 0;
-                        next.pos.dist=distance;
-                        choices[front].edges.push_back(next.pos);
-                        next.edges.push_back(choices[front].pos);
-                        next.edges.back().dist=distance;
+                        choices[front].edges.emplace_back(next.pos.row,next.pos.col,distance);
+                        next.edges.emplace_back(choices[front].pos.row,choices[front].pos.col,distance);
                         if(noDuplicates(next.pos)){
                             choices.push_back(next);
                             lasts.push_back(current);
@@ -204,7 +202,9 @@ struct matrix{
         at(choices.front().pos).letter='A';
         at(choices.back().pos).letter='Z';
         for(int j=1;j<choices.size()-1;j++){
-            at(choices[j].pos).letter = '0';
+            if(choices[j].edges.size()>2){   
+               at(choices[j].pos).letter = '0';
+            }
         }
         //label portal pairs
         for(int j=0;j<portals.size();j++){
