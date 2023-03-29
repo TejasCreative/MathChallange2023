@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include <queue>
+#include <tuple>
 
 struct matrix{
     int rows;
@@ -262,6 +263,11 @@ struct matrix{
         }
         mf.close();
     }
+
+
+
+
+
     void displayAdjacencyMatrix(std::string filename){
         std::ofstream mf;
         mf.open(filename);
@@ -273,6 +279,43 @@ struct matrix{
         }
         mf.close();
     }
+
+    int** makeAdjacencyMatrixI(){
+        int** adjmat = new int*[choices.size()];
+        int n;
+        for(int choice=0;choice<choices.size();choice++){
+            adjmat[choice] = new int[choices.size()];
+            for(int j=0;j<choices.size();j++){
+                adjmat[choice][j]=-1;
+            }
+            for(int edge=0;edge<at(choices[choice]).edges.size();edge++){
+                n = searchChoices(at(choices[choice]).edges[edge]);
+                adjmat[choice][n] = at(choices[choice]).edges[edge].dist;
+            }
+        }
+        return adjmat;
+    }
+
+    std::pair<int**, coord*> makeAdjacencyMatrix(){
+        int** adjmat = new int*[choices.size()];
+        coord* coords = new coord[choices.size()];
+        int n;
+        for(int choice=0;choice<choices.size();choice++){
+            adjmat[choice] = new int[choices.size()];
+            for(int j=0;j<choices.size();j++){
+                adjmat[choice][j]=-1;
+            }
+            for(int edge=0;edge<at(choices[choice]).edges.size();edge++){
+                n = searchChoices(at(choices[choice]).edges[edge]);
+                adjmat[choice][n] = at(choices[choice]).edges[edge].dist;
+            }
+            coords[choice] = choices[choice];
+        }
+        return std::make_pair(adjmat,coords);
+        
+    }
+    
+
     ~matrix(){
         for(int i=0;i<rows;i++){
             delete[] info[i];
