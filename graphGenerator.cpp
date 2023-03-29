@@ -10,15 +10,15 @@ int main(){
     data.writeMap("map.txt");
     data.convertAdMatrix();
     data.displayAdjacencyMatrix("adjmatrix.txt");
-    for (int i = 0; i < data.choices.size(); i++) {
-        for (int j = 0; j < data.choices.size(); j++) {
-            cout << data.adjmat[i][j] << " ";
-        }
-        cout << endl;
-    }
-    cout << "Coords: " << endl;
-    for(int i=0;i<data.choices.size();i++){
-        cout << data.choices[i] << endl;
-    }
+    // for (int i = 0; i < data.choices.size(); i++) {
+    //     for (int j = 0; j < data.choices.size(); j++) {
+    //         cout << data.adjmat[i][j] << " ";
+    //     }
+    //     cout << endl;
+    // }
+    // cout << "Coords: " << endl;
+    // for(int i=0;i<data.choices.size();i++){
+    //     cout << data.choices[i] << endl;
+    // }
     return 0;
 }
