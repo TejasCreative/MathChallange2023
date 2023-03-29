@@ -59,18 +59,28 @@ struct matrix{
                     line[col]=' ';
                 }
                 else if(line[col]=='A'){
-                    line[col] = '.';
-                    start.pos.row = row;
-                    start.pos.col = col;
+                    if(start.letter==' '){
+                        start.pos.row = row;
+                        start.pos.col = col;
+                        start.letter = 'A';
+                    }
+                    else{
+                        line[col] = '_';
+                    }
                 }
                 else if(line[col]=='Z'){
-                    line[col] = '.';
-                    end.pos.row = row;
-                    end.pos.col = col;
+                    if(end.letter==' '){
+                        end.pos.row = row;
+                        end.pos.col = col;
+                        end.letter = 'Z';
+                    }
+                    else{
+                        line[col] = '_';
+                    }
                 }
                 else if((int)line[col]>65 && (int)line[col]<90){
                     if(((int)data[row-1][col].letter>65 && (int)data[row-1][col].letter<90) || ((int)data[row][col-1].letter>65 && (int)data[row][col-1].letter<90)){
-                        line[col]='p';
+                        line[col]='_';
                     }
                     else{
                         node portal(row,col,0,line[col]);
@@ -103,10 +113,10 @@ struct matrix{
         }
         for(int i=0;i<4;i++){
             l = at(curr+shift[i]).letter;
-            if(l=='p'){
+            if(l=='_'){
                 l=at(curr+shift[i]+shift[i]).letter;
             }
-            if(l=='.' || l=='P'){
+            if(l=='.' || l=='P' || l=='Z' || l=='A'){
                 n++;
             }
         }
@@ -142,6 +152,7 @@ struct matrix{
                 if(!(choices.back()==end.pos)){
                     choices.push_back(end.pos);
                     lasts.push_back(end.pos);
+                    std::cout << "added end: " << at(choices.back());
                 }
                 else{
                     break;
@@ -162,7 +173,7 @@ struct matrix{
                 }
                 else{
                     next = at(current+shift[i]);
-                    if(next.letter=='p'){
+                    while(next.letter=='_'){
                         next = at(next.pos+shift[i]);
                     }
                 }
@@ -200,13 +211,9 @@ struct matrix{
                 choiceDirection=0;
             }
         }
-        //label choice nodes with 0
-        at(choices.front()).letter='A';
-        at(choices.back()).letter='Z';
+        //label choice nodes with *
         for(int j=1;j<choices.size()-1;j++){
-            // if(choices[j].edges.size()>2){   
-            // }
-               at(choices[j]).letter = '*';
+            at(choices[j]).letter = '*';
         }
         //label portal pairs
         for(int j=0;j<portals.size();j++){

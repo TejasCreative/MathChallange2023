@@ -65,7 +65,7 @@ class node{
             return pos==other.pos && letter==other.letter;
         }
         friend std::ostream& operator<<(std::ostream& os, node n){
-            os << n.pos << " | ";
+            os << n.pos << " | " << n.letter << " | ";
             for(int i=0;i<n.edges.size();i++){
                 os << n.edges[i] << ",";
             }
