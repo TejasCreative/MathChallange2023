@@ -14,13 +14,15 @@ struct matrix{
     node start;
     node end;
     node** info;
-    std::vector<node> choices;
+    int** adjmat;
+    std::vector<coord> choices;
     std::vector<coord> shift;
     std::vector<node> portals;
     matrix(){
         rows=0;
         cols=0;
         info=nullptr;
+        adjmat=nullptr;
         shift.emplace_back(-1,0,0);
         shift.emplace_back(0,1,0);
         shift.emplace_back(1,0,0);
@@ -110,14 +112,6 @@ struct matrix{
         }
         return n;
     }
-    bool noDuplicates(coord coordinate){
-        for(int i=0;i<choices.size();i++){
-            if(choices[i].pos==coordinate){
-                return false;
-            }
-        }
-        return true;
-    }
     coord searchPortals(coord current,int whichPortal=0){
         for(int i=0;i<portals.size();i++){
             if(portals[i].pos == current){
@@ -126,9 +120,17 @@ struct matrix{
         }
         return current;
     }
+    int searchChoices(coord coordinate){
+        for(int i=0;i<choices.size();i++){
+            if(coordinate==choices[i]){
+                return i;
+            }
+        }
+        return -1;
+    }
     void findChoices(){
         std::vector<coord> lasts; 
-        choices.push_back(start);
+        choices.push_back(start.pos);
         lasts.push_back(start.pos);
         coord current, last;
         node next;
@@ -137,15 +139,15 @@ struct matrix{
         int choiceDirection =0;
         while(front<=choices.size()){//check cardinal directions, NESW
             if(front==choices.size()){
-                if(noDuplicates(end.pos)){
-                    choices.push_back(end);
+                if(!(choices.back()==end.pos)){
+                    choices.push_back(end.pos);
                     lasts.push_back(end.pos);
                 }
                 else{
                     break;
                 }
             }
-            current = choices[front].pos;
+            current = choices[front];
             last = lasts[front];
             int i=choiceDirection;
             distance=0;
@@ -167,10 +169,10 @@ struct matrix{
                 if((next.letter=='.' || next.letter=='P')&& !(next.pos==last)){
                     distance++;
                     if(countOptions(next.pos)>2){//found a choice node
-                        choices[front].edges.emplace_back(next.pos.row,next.pos.col,distance);
-                        next.edges.emplace_back(choices[front].pos.row,choices[front].pos.col,distance);
-                        if(noDuplicates(next.pos)){
-                            choices.push_back(next);
+                        at(choices[front]).add(next.pos,distance);
+                        at(next.pos).add(choices[front],distance);
+                        if(searchChoices(next.pos)==-1){
+                            choices.push_back(next.pos);
                             lasts.push_back(current);
                         }
                         break;
@@ -182,12 +184,12 @@ struct matrix{
                         continue;
                     }
                     else{// < 2 dead end so reset to last choice currently exploring
-                        current = choices[front].pos;
+                        current = choices[front];
                         last = lasts[front];
                         break;
                     }
                 }
-                else if(current==choices[front].pos){
+                else if(current==choices[front]){
                     break;
                 }
                 i++;
@@ -199,12 +201,12 @@ struct matrix{
             }
         }
         //label choice nodes with 0
-        at(choices.front().pos).letter='A';
-        at(choices.back().pos).letter='Z';
+        at(choices.front()).letter='A';
+        at(choices.back()).letter='Z';
         for(int j=1;j<choices.size()-1;j++){
-            if(choices[j].edges.size()>2){   
-               at(choices[j].pos).letter = '0';
-            }
+            // if(choices[j].edges.size()>2){   
+            // }
+               at(choices[j]).letter = '*';
         }
         //label portal pairs
         for(int j=0;j<portals.size();j++){
@@ -215,12 +217,26 @@ struct matrix{
     node& operator()(int row, int col){
         return info[row][col];
     }
+    void convertAdMatrix(){
+        adjmat = new int*[choices.size()];
+        int n;
+        for(int choice=0;choice<choices.size();choice++){
+            adjmat[choice] = new int[choices.size()];
+            for(int j=0;j<choices.size();j++){
+                adjmat[choice][j]=-1;
+            }
+            for(int edge=0;edge<at(choices[choice]).edges.size();edge++){
+                n = searchChoices(at(choices[choice]).edges[edge]);
+                adjmat[choice][n] = at(choices[choice]).edges[edge].dist;
+            }
+        }
+    }
     void writeNodes(std::string filename){
         std::ofstream mf;
         mf.open(filename);
         mf << "Choices:\n";
         for(int i=0;i<choices.size();i++){
-            mf << choices[i] << "\n";
+            mf << at(choices[i]) << "\n";
         }
         mf << "\nPortals:\n";
         for(int i=0;i<portals.size();i++){
@@ -239,11 +255,28 @@ struct matrix{
         }
         mf.close();
     }
+    void displayAdjacencyMatrix(std::string filename){
+        std::ofstream mf;
+        mf.open(filename);
+        for(int i=0;i<choices.size();i++){
+            for(int j=0;j<choices.size();j++){
+                mf << adjmat[i][j] << " ";
+            }
+            mf << "\n";
+        }
+        mf.close();
+    }
     ~matrix(){
         for(int i=0;i<rows;i++){
             delete[] info[i];
         }
         delete[] info;
+        if(adjmat!=nullptr){
+            for(int i=0;i<choices.size();i++){
+                delete[] adjmat[i];
+            }
+            delete[] adjmat;
+        }
     }
 };
 

@@ -7,5 +7,7 @@ int main(){
     data.findChoices();
     data.writeNodes("matrix.txt");
     data.writeMap("map.txt");
+    data.convertAdMatrix();
+    data.displayAdjacencyMatrix("adjmatrix.txt");
     return 0;
 }

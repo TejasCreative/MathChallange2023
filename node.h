@@ -46,6 +46,21 @@ class node{
             pos.dist = d;
             letter =l;
         }
+        bool noDuplicates(coord p){
+            for(int i=0;i<edges.size();i++){
+                if(p==edges[i]){
+                    return false;
+                }
+            }
+            return true;
+        }
+        bool add(coord p,int d){
+            if(noDuplicates(p)){
+                edges.emplace_back(p.row,p.col,d);
+                return true;
+            }
+            return false;
+        }
         bool operator==(const node other){
             return pos==other.pos && letter==other.letter;
         }
