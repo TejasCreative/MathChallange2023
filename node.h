@@ -30,7 +30,7 @@ class node{
     public:
         coord pos;
         std::vector<coord> edges;
-        string letter;
+        char letter;
         node(){
             pos.row=0;
             pos.col=0;
