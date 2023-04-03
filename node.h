@@ -3,31 +3,48 @@
 #include "coord.h"
 #include <vector>
 #include <ostream>
+// struct node{
+//     coord pos;
+//     std::vector<coord> edges;
+//     char letter;
+//     node(){
+//         pos.row=0;
+//         pos.col=0;
+//         letter = ' ';
+//     }
+//     node(coord p,char l){
+//         letter =l;
+//         pos = p;
+//     }
 
+// };
+// std::ostream& operator<<(std::ostream& os, node n){
+//     os << n.pos << " | ";
+//     for(int i=0;i<n.edges.size();i++){
+//         os << n.edges[i] << ",";
+//     }
+//     return os;
+// }
 
 class node{
     public:
         coord pos;
         std::vector<coord> edges;
         char letter;
-        string s;
         node(){
             pos.row=0;
             pos.col=0;
             letter = ' ';
-            s = "";
         }
         node(coord p,char l){
             letter =l;
             pos = p;
-            s = "";
         }
         node(int r, int c, int d, char l){
             pos.row = r;
             pos.col = c;
             pos.dist = d;
             letter =l;
-            s = "";
         }
         bool noDuplicates(coord p){
             for(int i=0;i<edges.size();i++){
@@ -53,9 +70,6 @@ class node{
                 os << n.edges[i] << ",";
             }
             return os;
-        }
-        void addLetter(char l){
-            s+=l;
         }
 };
 
