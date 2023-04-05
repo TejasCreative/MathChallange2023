@@ -11,5 +11,7 @@ int main(){
     data.trimGraph(3);
     data.writeNodes("adjacencyList.txt");
     data.writeMap("map.txt");
+    data.solveMaze();
+    data.writeSolutionPaths("Solutions!.txt");
     return 0;
 }

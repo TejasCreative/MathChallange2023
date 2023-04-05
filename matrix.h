@@ -7,6 +7,7 @@
 #include <string>
 #include <algorithm>
 #include <vector>
+#include <unordered_set>
 
 struct matrix{
     //assuming only movement in cardinal directions and teleporting
@@ -20,6 +21,9 @@ struct matrix{
     std::vector<coord> choices;
     std::vector<coord> shift;
     std::vector<node> portals;
+    std::vector<std::string> solutionPaths;
+    std::unordered_set<coord,coordHash> visited;
+    std::vector<std::string> bestSolutions;
     matrix(){
         rows=0;
         cols=0;
@@ -288,7 +292,49 @@ struct matrix{
         }
         mf.close();
     }
-    
+    void searchFrom(coord c, std::string path){
+        visited.emplace(c.row,c.col,"");
+        path+=c.path+"|";
+        if((c==end->pos)){
+            solutionPaths.push_back(path);
+        }
+        for(int i=0;i<at(c).edges.size();i++){
+            if(visited.find(at(c).edges[i])==visited.end()){
+                searchFrom(at(c).edges[i],path);
+            }
+        }
+        visited.erase(c);
+    }
+    void solveMaze(){
+        searchFrom(start->pos,"");
+        visited.clear();
+        int min = 0;
+        for(int i=1;i<solutionPaths.size();i++){
+            if(solutionPaths[i].size() < solutionPaths[min].size()){
+                min = i;
+            }
+        }
+        for(int i=min;i<solutionPaths.size();i++){
+            if(solutionPaths[i].size()==solutionPaths[min].size()){
+                bestSolutions.push_back(solutionPaths[i]);
+            }
+        }
+    }
+    void writeSolutionPaths(std::string filename){
+        std::ofstream mf;
+        mf.open(filename);
+        mf << "There are " << solutionPaths.size() << " paths.\n\n";
+            mf << "The shortest path has " << bestSolutions[0].size() << " steps. They are: \n";
+        for(int i=0;i<bestSolutions.size();i++){
+            mf << bestSolutions[i] << "\n";
+        }
+        mf << "\n";
+        for(int i=0;i<solutionPaths.size();i++){
+            mf << "Solution " << i << " has " << solutionPaths[i].size() << " steps.\n";
+            mf << solutionPaths[i] << "\n\n";
+        }
+        mf.close();
+    }
     ~matrix(){
         if(info!=nullptr){
             for(int i=0;i<rows;i++){

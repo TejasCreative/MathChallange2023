@@ -29,19 +29,26 @@ class coord{
             path = other.path;
             return *this;
         }
-        coord operator+(const coord other){
+        coord operator+(const coord& other) const{
             coord c;
             c.row=this->row+other.row;
             c.col=this->col+other.col;
             c.path = this->path+other.path;
             return c;
         }
-        bool operator==(const coord other){
+        bool operator==(const coord& other) const{
             return row==other.row && col==other.col;
         }
         friend std::ostream& operator<<(std::ostream& os, coord c){
             os << '('<<c.row <<','<<c.col << ','<< c.path<<')';
             return os;
+        }
+};
+
+class coordHash{
+    public:
+        std::size_t operator()(const coord& c) const{
+            return 35*c.row+c.col;
         }
 };
 
