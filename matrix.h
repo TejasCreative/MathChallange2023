@@ -147,6 +147,7 @@ struct matrix{
             while(i<5){//depth first
                 if(i==4){
                     if(at(current).letter=='P'){
+                        line = line + "p";
                         next = &at(searchPortals(current)); //if currently at a portal go to the other portal
                     }
                     else{
@@ -154,19 +155,34 @@ struct matrix{
                     }
                 }
                 else{
-                    next = &at(current+shift[i]);
+                    next = &at(current+shift[i]);  
                     while(next->letter=='_'){
+                        line = line + "p";
                         next = &at(next->pos+shift[i]);
+                        
+
                     }
                 }
                 if((next->letter=='.' || next->letter=='P' || next->letter=='*' || next->letter=='Z') && !(next->pos==last)){
                     distance++;
-                    
+                    if(i == 0){
+                        line = line + "l";
+                    }
+                    else if(i == 1){
+                        line = line + "d";
+                    }
+                    else if(i == 2){
+                        line = line + "r";
+                    }
+                    else if(i == 3){
+                        line = line + "u";
+                    }
                     if(next->letter=='.'){ 
                         next->letter=',';//visited
                     }
                     if(next->letter=='*' || next->letter=='Z' || countOptions(next->pos)>2){//found a choice node
                         if(next->letter!='*'){                          //if a new choice node
+                            next->pos.path = line;
                             choices.push_back(next->pos);
                             next->letter='*';
                         }
@@ -175,6 +191,18 @@ struct matrix{
                         break;
                     }
                     else if(countOptions(next->pos)==2){//only one option to continue
+                        if(i == 0){
+                            line = line + "l";
+                        }
+                        else if(i == 1){
+                            line = line + "d";
+                        }
+                        else if(i == 2){
+                            line = line + "r";
+                        }
+                        else if(i == 3){
+                            line = line + "u";
+                        }
                         last = current;
                         current = next->pos;
                         i=0;

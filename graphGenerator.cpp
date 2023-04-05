@@ -14,6 +14,11 @@ int main(){
     for(int i=0;i<data.choices.size();i++){
         cout << data.choices[i] << endl;
     }
+
+
+    for(int i=0;i<data.shift.size();i++){
+        cout << data.shift[i] << endl;
+    }
     
     
     return 0;
