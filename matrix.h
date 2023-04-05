@@ -134,18 +134,20 @@ struct matrix{
         return -1;
     }
     void findChoices(){
+        
         choices.push_back(start->pos);
         coord current,last;
         node* next;
         int distance,i,front=0,choiceDirection =0;
         while(front<choices.size()){//breadth first
+            std::string line = "";
             current = choices[front];
             i=choiceDirection;
             distance=0;
             while(i<5){//depth first
                 if(i==4){
                     if(at(current).letter=='P'){
-                        next = &at(searchPortals(current));
+                        next = &at(searchPortals(current)); //if currently at a portal go to the other portal
                     }
                     else{
                         break;
@@ -159,7 +161,8 @@ struct matrix{
                 }
                 if((next->letter=='.' || next->letter=='P' || next->letter=='*' || next->letter=='Z') && !(next->pos==last)){
                     distance++;
-                    if(next->letter=='.'){
+                    
+                    if(next->letter=='.'){ 
                         next->letter=',';//visited
                     }
                     if(next->letter=='*' || next->letter=='Z' || countOptions(next->pos)>2){//found a choice node

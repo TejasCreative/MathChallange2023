@@ -7,7 +7,7 @@ class coord{
         int row;
         int col;
         int dist;
-        string path;
+        std::string path;
         coord(){
             row=0;
             col=0;
@@ -42,7 +42,7 @@ class coord{
             return row==other.row && col==other.col;
         }
         friend std::ostream& operator<<(std::ostream& os, coord c){
-            os << '('<<c.row <<','<<c.col << ','<< c.dist<<')';
+            os << '('<<c.row <<','<<c.col << ','<< c.dist<<')' << c.path;
             return os;
         }
 };
