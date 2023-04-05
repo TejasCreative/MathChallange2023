@@ -13,5 +13,6 @@ int main(){
     data.writeMap("map.txt");
     data.solveMaze();
     data.writeSolutionPaths("Solutions!.txt");
+    data.checkSolutions();
     return 0;
 }

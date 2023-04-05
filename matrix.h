@@ -294,7 +294,7 @@ struct matrix{
     }
     void searchFrom(coord c, std::string path){
         visited.emplace(c.row,c.col,"");
-        path+=c.path+"|";
+        path+=c.path; //+ "|"
         if((c==end->pos)){
             solutionPaths.push_back(path);
         }
@@ -334,6 +334,35 @@ struct matrix{
             mf << solutionPaths[i] << "\n\n";
         }
         mf.close();
+    }
+    bool verify(std::string path){
+        visited.clear();
+        coord myPosition = start->pos;
+        char c;
+        for(int i=0;i<path.size();i++){
+            if(visited.find(myPosition)!=visited.end()){
+                return false;
+            }
+            visited.insert(myPosition);
+            c = path[i];
+            if(c=='4'){
+                myPosition = searchPortals(myPosition);
+            }
+            else{
+                do{
+                    myPosition = myPosition + shift[(int)(c-48)];
+                }while(at(myPosition).letter=='_');
+            }
+        }
+        visited.clear();
+        return myPosition==end->pos;
+    }
+    void checkSolutions(){
+        for(int i=0;i<solutionPaths.size();i++){
+            if(!verify(solutionPaths[i])){
+                std::cout << i << " Failed\n";
+            }
+        }
     }
     ~matrix(){
         if(info!=nullptr){
