@@ -5,6 +5,7 @@
 #include "node.h"
 #include "coord.h"
 #include <string>
+#include <algorithm>
 #include <vector>
 
 struct matrix{
@@ -26,10 +27,10 @@ struct matrix{
         start=nullptr;
         end=nullptr;
         adjmat=nullptr;
-        shift.emplace_back(-1,0,0);
-        shift.emplace_back(0,1,0);
-        shift.emplace_back(1,0,0);
-        shift.emplace_back(0,-1,0);
+        shift.emplace_back(-1,0,"");
+        shift.emplace_back(0,1,"");
+        shift.emplace_back(1,0,"");
+        shift.emplace_back(0,-1,"");
     }
     void linkPortals(node& n){
         for(int i=0;i<portals.size();i++){
@@ -65,7 +66,7 @@ struct matrix{
                         line[col]='_';
                     }
                     else{
-                        node portal(row,col,0,line[col]);
+                        node portal(row,col,line[col]);
                         linkPortals(portal);
                         portals.push_back(portal);
                         line[col]='P';
@@ -133,21 +134,31 @@ struct matrix{
         }
         return -1;
     }
+    std::string flipPath(std::string s){
+        std::string r = "";
+        for(int i=s.length()-1;i>=0;i--){
+            if(s[i]!='4'){
+                r+=(char)((((s[i]-48)+2)%4)+48);
+            }
+            else{
+                r+='4';
+            }
+        }
+        return r;
+    }
     void findChoices(){
         
         choices.push_back(start->pos);
         coord current,last;
         node* next;
-        int distance,i,front=0,choiceDirection =0;
+        int i,front=0,choiceDirection =0;
         while(front<choices.size()){//breadth first
             std::string line = "";
             current = choices[front];
             i=choiceDirection;
-            distance=0;
             while(i<5){//depth first
                 if(i==4){
                     if(at(current).letter=='P'){
-                        line = line + "p";
                         next = &at(searchPortals(current)); //if currently at a portal go to the other portal
                     }
                     else{
@@ -157,52 +168,26 @@ struct matrix{
                 else{
                     next = &at(current+shift[i]);  
                     while(next->letter=='_'){
-                        line = line + "p";
                         next = &at(next->pos+shift[i]);
                         
 
                     }
                 }
                 if((next->letter=='.' || next->letter=='P' || next->letter=='*' || next->letter=='Z') && !(next->pos==last)){
-                    distance++;
-                    if(i == 0){
-                        line = line + "l";
-                    }
-                    else if(i == 1){
-                        line = line + "d";
-                    }
-                    else if(i == 2){
-                        line = line + "r";
-                    }
-                    else if(i == 3){
-                        line = line + "u";
-                    }
+                    line+=(char)(i+48);
                     if(next->letter=='.'){ 
                         next->letter=',';//visited
                     }
                     if(next->letter=='*' || next->letter=='Z' || countOptions(next->pos)>2){//found a choice node
                         if(next->letter!='*'){                          //if a new choice node
-                            next->pos.path = line;
                             choices.push_back(next->pos);
                             next->letter='*';
                         }
-                        at(choices[front]).add(next->pos,distance);
-                        next->add(at(choices[front]).pos,distance);
+                        at(choices[front]).add(next->pos,line);
+                        next->add(choices[front],flipPath(line));
                         break;
                     }
                     else if(countOptions(next->pos)==2){//only one option to continue
-                        if(i == 0){
-                            line = line + "l";
-                        }
-                        else if(i == 1){
-                            line = line + "d";
-                        }
-                        else if(i == 2){
-                            line = line + "r";
-                        }
-                        else if(i == 3){
-                            line = line + "u";
-                        }
                         last = current;
                         current = next->pos;
                         i=0;
@@ -236,10 +221,10 @@ struct matrix{
     void prune(node* vertex){
         for(int i=0;i<vertex->edges.size();i++){
             for(int j=0;j<i;j++){
-                at(vertex->edges[i]).add(vertex->edges[j],vertex->edges[i].dist+vertex->edges[j].dist, true);
+                at(vertex->edges[i]).add(vertex->edges[j],flipPath(vertex->edges[i].path) + vertex->edges[j].path, true);
             }
             for(int j=i+1;j<vertex->edges.size();j++){
-                at(vertex->edges[i]).add(vertex->edges[j],vertex->edges[i].dist+vertex->edges[j].dist,true);
+                at(vertex->edges[i]).add(vertex->edges[j],flipPath(vertex->edges[i].path) + vertex->edges[j].path,true);
             }
             at(vertex->edges[i]).remove(vertex->pos);
         }
@@ -264,7 +249,7 @@ struct matrix{
             }
             for(int edge=0;edge<at(choices[choice]).edges.size();edge++){
                 n = searchChoices(at(choices[choice]).edges[edge]);
-                adjmat[choice][n] = at(choices[choice]).edges[edge].dist;
+                adjmat[choice][n] = at(choices[choice]).edges[edge].path.length();
             }
         }
     }

@@ -18,23 +18,22 @@ class node{
             pos = p;
             letter =l;
         }
-        node(int r, int c, int d, char l){
+        node(int r, int c, char l){
             pos.row = r;
             pos.col = c;
-            pos.dist = d;
             letter =l;
         }
-        bool noDuplicates(coord p,int d){//needs improvement
+        bool noDuplicates(coord p,std::string l){//needs improvement
             for(int i=0;i<edges.size();i++){
-                if(p==edges[i] && d==edges[i].dist){
+                if(p==edges[i] && l==edges[i].path){
                     return false;
                 }
             }
             return true;
         }
-        bool add(coord p,int d, bool fine = false){//needs improvement
-            if(fine || noDuplicates(p,d)){
-                edges.emplace_back(p.row,p.col,d);
+        bool add(coord p, std::string path, bool fine = false){//needs improvement
+            if(fine || noDuplicates(p,path)){
+                edges.emplace_back(p.row,p.col,path);
                 return true;
             }
             return false;
