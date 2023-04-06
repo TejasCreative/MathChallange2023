@@ -1,84 +1,54 @@
 #ifndef COORD_H
 #define COORD_H
+#include <string>
 #include <ostream>
-// struct coord{
-//     int row;
-//     int col;
-//     int dist;
-//     coord(){
-//         row=0;
-//         col=0;
-//         dist=0;
-//     }
-//     coord(int r, int c, int d){
-//         row=r;
-//         col=c;
-//         dist = d;
-//     }
-//     coord(const coord& other){
-//         row = other.row;
-//         col = other.col;
-//         dist = other.dist;
-//     }
-//     coord& operator=(const coord& other){
-//         row = other.row;
-//         col = other.col;
-//         dist = other.dist;
-//         return *this;
-//     }
-//     coord operator+(const coord other){
-//         coord c;
-//         c.row=this->row+other.row;
-//         c.col=this->col+other.col;
-//         return c;
-//     }
-//     bool operator==(const coord other){
-//         return row==other.row && col==other.col;
-//     }
-// };
-// std::ostream& operator<<(std::ostream& os, coord c){
-//     os << '('<<c.row <<','<<c.col << ','<< c.dist<<')';
-//     return os;
-// }
 
 class coord{
     public:
         int row;
         int col;
-        int dist;
+        std::string path;
         coord(){
             row=0;
             col=0;
-            dist=0;
+            path = "";
         }
-        coord(int r, int c, int d){
+        coord(int r, int c, std::string p){
             row=r;
             col=c;
-            dist = d;
+            path = p;
         }
         coord(const coord& other){
             row = other.row;
             col = other.col;
-            dist = other.dist;
+            path = other.path;
         }
         coord& operator=(const coord& other){
             row = other.row;
             col = other.col;
-            dist = other.dist;
+            path = other.path;
             return *this;
         }
-        coord operator+(const coord other){
+        coord operator+(const coord& other) const{
             coord c;
             c.row=this->row+other.row;
             c.col=this->col+other.col;
+            c.path = this->path+other.path;
             return c;
         }
-        bool operator==(const coord other){
+        bool operator==(const coord& other) const{
             return row==other.row && col==other.col;
         }
         friend std::ostream& operator<<(std::ostream& os, coord c){
-            os << '('<<c.row <<','<<c.col << ','<< c.dist<<')';
+            os << '('<<c.row <<','<<c.col << ','<< c.path<<')';
             return os;
+        }
+};
+
+class coordHash{
+    public:
+        std::size_t operator()(const coord& c) const{
+            return 35*c.row+c.col;
         }
 };
 

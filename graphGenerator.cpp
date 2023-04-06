@@ -6,19 +6,13 @@ int main(){
     matrix data;
     data.generate2d("AM_Challenge_packet_participant/AM_challenge23_input.txt");
     data.findChoices();
-    data.writeNodes("matrix.txt");
-    data.writeMap("map.txt");
+    data.trimGraph(3);
     data.convertAdMatrix();
     data.displayAdjacencyMatrix("adjmatrix.txt");
-    // for (int i = 0; i < data.choices.size(); i++) {
-    //     for (int j = 0; j < data.choices.size(); j++) {
-    //         cout << data.adjmat[i][j] << " ";
-    //     }
-    //     cout << endl;
-    // }
-    // cout << "Coords: " << endl;
-    // for(int i=0;i<data.choices.size();i++){
-    //     cout << data.choices[i] << endl;
-    // }
+    data.writeNodes("adjacencyList.txt");
+    data.writeMap("map.txt");
+    data.solveMaze();
+    data.writeSolutionPaths("Solutions!.txt");
+    data.checkSolutions();
     return 0;
 }
