@@ -32,7 +32,7 @@ class node{
             return true;
         }
         bool add(coord p, std::string path, bool fine = false){//needs improvement
-            if(fine || noDuplicates(p,path)){
+            if(!(pos==p) && (fine || noDuplicates(p,path))){
                 edges.emplace_back(p.row,p.col,path);
                 return true;
             }

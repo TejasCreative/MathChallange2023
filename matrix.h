@@ -24,9 +24,12 @@ struct matrix{
     std::vector<std::string> solutionPaths;
     std::unordered_set<coord,coordHash> visited;
     std::vector<std::string> bestSolutions;
+    std::vector<std::string> LongestSolutions;
+    std::string homeStretch;
     matrix(){
         rows=0;
         cols=0;
+        homeStretch = "";
         info=nullptr;
         start=nullptr;
         end=nullptr;
@@ -150,8 +153,7 @@ struct matrix{
         }
         return r;
     }
-    void findChoices(){
-        
+    void findChoices(){  
         choices.push_back(start->pos);
         coord current,last;
         node* next;
@@ -218,8 +220,10 @@ struct matrix{
             at(portals[j].pos).letter = (char)(66+j);
             at(portals[j].edges[0]).letter = (char)(66+j);
         }
-        choices.erase(choices.begin()+searchChoices(end->pos));
-        choices.push_back(end->pos);
+        if(searchChoices(end->pos)!=-1){
+            choices.erase(choices.begin()+searchChoices(end->pos));
+            choices.push_back(end->pos);
+        }
         end->letter='Z';
     }
     void prune(node* vertex){
@@ -237,10 +241,26 @@ struct matrix{
         vertex->letter=',';
     }
     void trimGraph(int size){
-        for(int i=choices.size()-2;i>0;i--){//skip A and Z (0 and end)
-            if(at(choices[i]).edges.size()<size){
-                prune(&at(choices[i]));
+        if(choices.back()==end->pos){
+            for(int i=choices.size()-2;i>0;i--){//skip A and Z (0 and end)
+                if(at(choices[i]).edges.size()<size){
+                    prune(&at(choices[i]));
+                }
             }
+            if(end->edges.size()==1){           //prune Z if necessary
+                homeStretch = flipPath(end->edges[0].path);
+                node* temp = &(at(end->edges[0]));
+                prune(end);
+                end->letter = 'Z';
+                end = temp;
+            }
+            //could safely prune these loops
+            // prune(&at(choices[20]));
+            // prune(&at(choices[18]));
+            // prune(&at(choices[17]));
+            // prune(&at(choices[16]));
+            // prune(&at(choices[7]));
+            // prune(&at(choices[5]));
         }
     }
     void convertAdMatrix(){
@@ -296,27 +316,38 @@ struct matrix{
         visited.emplace(c.row,c.col,"");
         path+=c.path; //+ "|"
         if((c==end->pos)){
+            path+=homeStretch;
             solutionPaths.push_back(path);
         }
-        for(int i=0;i<at(c).edges.size();i++){
-            if(visited.find(at(c).edges[i])==visited.end()){
-                searchFrom(at(c).edges[i],path);
+        else{
+            for(int i=0;i<at(c).edges.size();i++){
+                if(visited.find(at(c).edges[i])==visited.end()){
+                    searchFrom(at(c).edges[i],path);
+                }
             }
         }
         visited.erase(c);
     }
     void solveMaze(){
-        searchFrom(start->pos,"");
-        visited.clear();
-        int min = 0;
-        for(int i=1;i<solutionPaths.size();i++){
-            if(solutionPaths[i].size() < solutionPaths[min].size()){
-                min = i;
+        if(searchChoices(end->pos)!=-1){
+            searchFrom(start->pos,"");
+            int min = 0;
+            int max = 0;
+            for(int i=1;i<solutionPaths.size();i++){
+                if(solutionPaths[i].size() < solutionPaths[min].size()){
+                    min = i;
+                }
+                if(solutionPaths[i].size() > solutionPaths[max].size()){
+                    max = i;
+                }
             }
-        }
-        for(int i=min;i<solutionPaths.size();i++){
-            if(solutionPaths[i].size()==solutionPaths[min].size()){
-                bestSolutions.push_back(solutionPaths[i]);
+            for(int i=0;i<solutionPaths.size();i++){
+                if(solutionPaths[i].size()==solutionPaths[min].size()){
+                    bestSolutions.push_back(solutionPaths[i]);
+                }
+                if(solutionPaths[i].size()==solutionPaths[max].size()){
+                    LongestSolutions.push_back(solutionPaths[i]);
+                }
             }
         }
     }
@@ -324,45 +355,55 @@ struct matrix{
         std::ofstream mf;
         mf.open(filename);
         mf << "There are " << solutionPaths.size() << " paths.\n\n";
+        if(solutionPaths.size()>0){
             mf << "The shortest path has " << bestSolutions[0].size() << " steps. They are: \n";
-        for(int i=0;i<bestSolutions.size();i++){
-            mf << bestSolutions[i] << "\n";
-        }
-        mf << "\n";
-        for(int i=0;i<solutionPaths.size();i++){
-            mf << "Solution " << i << " has " << solutionPaths[i].size() << " steps.\n";
-            mf << solutionPaths[i] << "\n\n";
+            for(int i=0;i<bestSolutions.size();i++){
+                mf << bestSolutions[i] << "\n";
+            }
+            mf << "\nThe longest path has " << LongestSolutions[0].size() << " steps. They are: \n";
+            for(int i=0;i<LongestSolutions.size();i++){
+                mf << LongestSolutions[i] << "\n";
+            }
+            mf << "\n";
+            for(int i=0;i<solutionPaths.size();i++){
+                mf << "Solution " << i << " has " << solutionPaths[i].size() << " steps.\n";
+                mf << solutionPaths[i] << "\n\n";
+            }
         }
         mf.close();
     }
     bool verify(std::string path){
         visited.clear();
         coord myPosition = start->pos;
-        char c;
         for(int i=0;i<path.size();i++){
             if(visited.find(myPosition)!=visited.end()){
                 return false;
             }
             visited.insert(myPosition);
-            c = path[i];
-            if(c=='4'){
+            if(path[i]=='4'){
                 myPosition = searchPortals(myPosition);
             }
             else{
                 do{
-                    myPosition = myPosition + shift[(int)(c-48)];
+                    myPosition = myPosition + shift[(int)(path[i]-48)];
                 }while(at(myPosition).letter=='_');
             }
         }
         visited.clear();
-        return myPosition==end->pos;
+        return at(myPosition).letter=='Z';
     }
-    void checkSolutions(){
+    int checkSolutions(){
+        std::unordered_set<std::string> verified;
+        verified.reserve(solutionPaths.size());
+        int n=0;
         for(int i=0;i<solutionPaths.size();i++){
-            if(!verify(solutionPaths[i])){
-                std::cout << i << " Failed\n";
+            //each solution should be unique, not cross itself, and go from A to Z
+            if(verified.find(solutionPaths[i])==verified.end() && verify(solutionPaths[i])){
+                verified.insert(solutionPaths[i]);
+                n++;
             }
         }
+        return n;
     }
     ~matrix(){
         if(info!=nullptr){
