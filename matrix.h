@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <vector>
 #include <unordered_set>
+#include <random>
 
 struct matrix{
     //assuming only movement in cardinal directions and teleporting
@@ -26,9 +27,11 @@ struct matrix{
     std::vector<std::string> bestSolutions;
     std::vector<std::string> LongestSolutions;
     std::string homeStretch;
+    int T;
     matrix(){
         rows=0;
         cols=0;
+        T=0;
         homeStretch = "";
         info=nullptr;
         start=nullptr;
@@ -238,19 +241,24 @@ struct matrix{
         }
         vertex->edges.clear();
         choices.erase(choices.begin() + searchChoices(vertex->pos));
-        vertex->letter=',';
+        if (vertex->letter=='*'){
+            vertex->letter=',';
+        }
     }
-    void trimGraph(int size){
+    int trimGraph(int size){
+        int n=0;
         if(choices.back()==end->pos){
             for(int i=choices.size()-2;i>0;i--){//skip A and Z (0 and end)
                 if(at(choices[i]).edges.size()<size){
                     prune(&at(choices[i]));
+                    n++;
                 }
             }
             if(end->edges.size()==1){           //prune Z if necessary
                 homeStretch = flipPath(end->edges[0].path);
                 node* temp = &(at(end->edges[0]));
                 prune(end);
+                n++;
                 end->letter = 'Z';
                 end = temp;
             }
@@ -262,6 +270,7 @@ struct matrix{
             // prune(&at(choices[7]));
             // prune(&at(choices[5]));
         }
+        return n;
     }
     void convertAdMatrix(){
         adjmat = new int*[choices.size()];
@@ -312,17 +321,18 @@ struct matrix{
         }
         mf.close();
     }
-    void searchFrom(coord c, std::string path){
-        visited.emplace(c.row,c.col,"");
-        path+=c.path; //+ "|"
-        if((c==end->pos)){
+    void searchFrom(coord c, std::string path){ //T(C) C=choices.size()
+        T++;
+        visited.emplace(c.row,c.col,""); //O(1)
+        path+=c.path; //+ "|"             //O(L) L total length of strings
+        if((c==end->pos)){                 //O(1)
             path+=homeStretch;
             solutionPaths.push_back(path);
         }
         else{
-            for(int i=0;i<at(c).edges.size();i++){
-                if(visited.find(at(c).edges[i])==visited.end()){
-                    searchFrom(at(c).edges[i],path);
+            for(int i=0;i<at(c).edges.size();i++){          //edges.size() <= 3
+                if(visited.find(at(c).edges[i])==visited.end()){        //false for at least 1 of 3
+                    searchFrom(at(c).edges[i],path);            //recursive
                 }
             }
         }
@@ -404,6 +414,135 @@ struct matrix{
             }
         }
         return n;
+    }
+    bool checkPlaceability(coord c, char** arr, int n, int forward){
+        coord check;
+        for(int i=0;i<4;i++){
+            check = c+shift[i];
+            if(i==(forward+2)%4){
+                continue;
+            }
+            if(check.row >= n || check.row <= 0 || check.col >= n || check.col <= 0 || arr[check.row][check.col]=='.'){
+                // std::cout << "can't place at: " << c << " because " << check << "\n"; 
+                return false;
+            }
+        }
+        return true;
+    }
+    void generateMaze(int n){
+        char** arr = new char*[n];
+        for(int i=0;i<n;i++){
+            arr[i]= new char[n];
+            for(int j=0;j<n;j++){
+                arr[i][j] = '#';
+            }
+        }
+        std::ofstream mf;
+        mf.open("newMaze.txt");
+        for(int r=0;r<n;r++){
+            for(int c=0;c<n;c++){
+                mf << arr[r][c];
+            }
+            mf << "\n";
+        }
+        mf.close();
+
+        int precision = 100000;
+        int probabilityOfIntersection = 14000;
+        int probabilityOfQuadIntersection = 12000;
+        int probabilityOfTurning = 11000;
+
+        coord begin(1,rand() % n-8,"123");
+        std::vector<coord> intersections;
+        intersections.push_back(begin);
+        coord current, next;
+        int i=1,front=0,choiceDirection =0;
+        while(front<intersections.size()){//breadth first
+            current = intersections[front];
+            i=(int)current.path[choiceDirection]-48;
+            int length=0;
+            while(true){
+                next = current+shift[i];
+                if( next.row <= 0 || next.row >= n || next.col >= n || next.col<=0 || arr[next.row][next.col] == '.'){//if no new directions for some reason...
+                    // std::cout << "out of bounds or next is a period\n";
+                    break;
+                }
+                if(!checkPlaceability(next, arr, n, i)){
+                    // std::cout << "current is: " << current << "\n";
+                    break;
+                }
+                arr[next.row][next.col]='.';
+                if(rand()%precision < probabilityOfIntersection*(length)){//new intersection or dead end
+                    std::string direction = std::to_string((i+2)%4);
+                    int c = rand() % precision;
+                    if(c<probabilityOfQuadIntersection){
+                        direction = "0123";
+                    }
+                    else{
+                        int whichPaths = rand() % 4;
+                        if(whichPaths==0){
+                            direction+="012";
+                        }
+                        else if(whichPaths==1){
+                            direction+="123";
+                        }
+                        else if(whichPaths==2){
+                            direction+="013";
+                        }
+                        else{
+                            direction+="023";
+                        }
+                    }
+                    next.path = direction;
+                    intersections.push_back(next);
+                    // arr[next.row][next.col] = '*';
+                    break;
+                }
+                if(rand() % precision < probabilityOfTurning*length){//turning
+                    // arr[next.row][next.col]='t';
+                    i = (i+rand() % 3-1)%4;
+                }
+                current = next;
+                // mf.open("newMaze.txt");
+                // for(int r=0;r<n;r++){
+                //     for(int c=0;c<n;c++){
+                //         mf << arr[r][c];
+                //     }
+                //     mf << "\n";
+                // }
+                // mf.close();
+                // std::string test;
+                // std::cin >> test;
+                length++;
+            }
+            choiceDirection++;
+            if(choiceDirection>=intersections[front].path.size()){
+                front++;
+                choiceDirection=0;
+            }
+        }
+        std::cout << intersections.size() << "\n";
+        arr[begin.row][begin.col] = 'A';
+        arr[begin.row-1][begin.col] = 'A';
+        //label portal pairs
+        // for(int j=0;j<portals.size();j++){
+        //     at(portals[j].pos).letter = (char)(66+j);
+        //     at(portals[j].edges[0]).letter = (char)(66+j);
+        // }
+        // end->letter='Z';
+
+        mf.open("newMaze.txt");
+        for(int r=0;r<n;r++){
+            for(int c=0;c<n;c++){
+                mf << arr[r][c];
+            }
+            mf << "\n";
+        }
+        mf.close();
+        for(int i=0;i<n;i++){
+            delete[] arr[i];
+        }
+        delete[] arr;
     }
     ~matrix(){
         if(info!=nullptr){

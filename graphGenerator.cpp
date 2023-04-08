@@ -5,19 +5,44 @@ using namespace std;
 
 int main(){
     matrix data;
-    data.generate2d("AM_challenge23_input.txt");
-    data.findChoices();
+    int n=0;
     auto start = chrono::high_resolution_clock::now();
-    data.trimGraph(3);
-    data.solveMaze();
+    data.generate2d("newMaze.txt");
     auto stop = chrono::high_resolution_clock::now();
     auto duration = chrono::duration_cast<chrono::microseconds>(stop-start);
-    cout << "\nMicroseconds taken to trim graph and then solve: " << duration.count() << "\n";
-    data.convertAdMatrix();
-    data.displayAdjacencyMatrix("adjmatrix.txt");
-    data.writeNodes("adjacencyList.txt");
-    data.writeMap("map.txt");
-    data.writeSolutionPaths("Solutions!.txt");
-    cout << data.checkSolutions() << " correct solutions out of " << data.solutionPaths.size() <<" found\n\n";
+    std::cout << "Generated Matrix in " << duration.count() << " microseconds.\n";
+    
+    start = chrono::high_resolution_clock::now();
+    data.findChoices();
+    stop = chrono::high_resolution_clock::now();
+    duration = chrono::duration_cast<chrono::microseconds>(stop-start);
+    std::cout << "Found " << data.choices.size() << " choices in " << duration.count() << " microseconds.\n";
+    
+    start = chrono::high_resolution_clock::now();
+    n = data.trimGraph(3);
+    stop = chrono::high_resolution_clock::now();
+    duration = chrono::duration_cast<chrono::microseconds>(stop-start);
+    std::cout << "Eliminated " << n << " choices in " << duration.count() << " microseconds.\n";
+
+    start = chrono::high_resolution_clock::now();
+    data.solveMaze();
+    stop = chrono::high_resolution_clock::now();
+    duration = chrono::duration_cast<chrono::microseconds>(stop-start);
+    cout << "Solved Maze in: " << duration.count() << " microseconds.\n";
+    cout << "Made " << data.T << " recursive calls.\n";
+     
+    start = chrono::high_resolution_clock::now();
+    n = data.checkSolutions();
+    stop = chrono::high_resolution_clock::now();
+    duration = chrono::duration_cast<chrono::microseconds>(stop-start);
+    cout << "Verified " << n << " correct solutions out of " << data.solutionPaths.size() << " in " << duration.count() << " microseconds.\n";
+    
+    // data.convertAdMatrix();
+    // data.displayAdjacencyMatrix("adjmatrix.txt");
+    data.writeNodes("newMazeadjacencyList.txt");
+    data.writeMap("newMap.txt");
+    data.writeSolutionPaths("newSolutions!.txt");
+    // data.generateMaze(50);
+    
     return 0;
 }
