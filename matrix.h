@@ -338,15 +338,9 @@ struct matrix{
     void writeCleanSolutionsPath(std::string filename){
         std::ofstream mf;
         mf.open(filename);
-        mf << solutionPaths.size() << "\n\n";
-            mf << bestSolutions[0].size() << "\n";
-        for(int i=0;i<bestSolutions.size();i++){
-            mf << bestSolutions[i] << "\n";
-        }
-        mf << "\n";
         for(int i=0;i<solutionPaths.size();i++){
             mf << solutionPaths[i].size() << "\n";
-            mf << solutionPaths[i] << "\n\n";
+            mf << solutionPaths[i] << "\n";
         }
         mf.close();
     }
