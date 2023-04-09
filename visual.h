@@ -6,6 +6,8 @@
 #include <string>
 #include <fstream>
 #include <tuple>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #include "coord.h"
 #include "matrix.h"
@@ -17,6 +19,30 @@ class Visual{
         Visual(){
             //std::cout << "Visual constructor" << std::endl;
         }
+        void replicate(std::string filename){
+            std::string line;
+            std::ifstream file{"map.txt"};
+            std::ofstream output{filename};
+            if(file.is_open()){
+                while(file.good()){
+                    std::getline(file,line);
+                    output << line << std::endl;
+                }
+            }
+            else{
+                std::cout << "File not found" << std::endl;
+            }
+            file.close();
+            output.close();
+
+        }
+        void draw(std::string path, std::string filename){
+
+        }
+        void drawOverview(std::string short_path, std::string long_path, std::string filename){
+
+        }
+
         void visualize(std::string filename){
             std::ifstream file;
             file.open(filename);
@@ -69,10 +95,22 @@ class Visual{
             for(auto i : longest){
                 std::cout << std::get<0>(i) << " " << std::get<1>(i) << std::endl;
             }
+            replicate("overview.txt");
+            // drawOverview(smallest,longest, "overview.txt");
 
-            
+            //insert code to map on overview
+
+            mkdir("Solutions", 0777);
+            for(int i = 0; i < lines.size(); i++){
+                replicate("Solutions/Solution_" + std::to_string(i+1) + ".txt");
+                // draw(std::get<1>(lines[i]), "Solutions/Solution_" + std::to_string(i+1) + ".txt");
+            }
+            std::cout << "Visualize complete" << std::endl;
+
+
 
         }
+
 
 
 

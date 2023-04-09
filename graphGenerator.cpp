@@ -16,6 +16,7 @@ int main(){
     data.writeSolutionPaths("Solutions!.txt");
     data.writeCleanSolutionsPath("CleanSolutions!.txt");
     data.checkSolutions();
+    data.prepVisual();
     Visual v;
     v.visualize("CleanSolutions!.txt");
 
