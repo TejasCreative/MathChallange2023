@@ -1,5 +1,6 @@
 #include "matrix.h"
 #include "coord.h"
+#include "visual.h"
 using namespace std;
 
 int main(){
@@ -13,6 +14,10 @@ int main(){
     data.writeMap("map.txt");
     data.solveMaze();
     data.writeSolutionPaths("Solutions!.txt");
+    data.writeCleanSolutionsPath("CleanSolutions!.txt");
     data.checkSolutions();
+    Visual v;
+    v.visualize("CleanSolutions!.txt");
+
     return 0;
 }
