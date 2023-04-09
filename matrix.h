@@ -330,7 +330,7 @@ struct matrix{
             solutionPaths.push_back(path);
         }
         else{
-            for(int i=0;i<at(c).edges.size();i++){          //edges.size() <= 3
+            for(int i=0;i<at(c).edges.size();i++){          //edges.size() <= 4
                 if(visited.find(at(c).edges[i])==visited.end()){        //false for at least 1 of 3
                     searchFrom(at(c).edges[i],path);            //recursive
                 }
@@ -419,10 +419,10 @@ struct matrix{
         coord check;
         for(int i=0;i<4;i++){
             check = c+shift[i];
-            if(i==(forward+2)%4){
+            if(i==(forward+2)%4 || (1==forward && rand()%3==0)){
                 continue;
             }
-            if(check.row >= n || check.row <= 0 || check.col >= n || check.col <= 0 || arr[check.row][check.col]=='.'){
+            if(check.row >= n || check.row <= 0 || check.col >= n || check.col <= 0 || (arr[check.row][check.col]=='.' && rand()%8<6)){
                 // std::cout << "can't place at: " << c << " because " << check << "\n"; 
                 return false;
             }
@@ -448,9 +448,9 @@ struct matrix{
         mf.close();
 
         int precision = 100000;
-        int probabilityOfIntersection = 14000;
-        int probabilityOfQuadIntersection = 12000;
-        int probabilityOfTurning = 11000;
+        int probabilityOfIntersection = 10000;
+        int probabilityOfQuadIntersection = 10000;
+        int probabilityOfTurning = 10000;
 
         coord begin(1,rand() % n-8,"123");
         std::vector<coord> intersections;
