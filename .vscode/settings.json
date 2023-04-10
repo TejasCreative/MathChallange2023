@@ -72,6 +72,8 @@
         "unordered_map": "cpp",
         "unordered_set": "cpp",
         "filesystem": "cpp",
-        "numeric": "cpp"
+        "numeric": "cpp",
+        "stop_token": "cpp",
+        "thread": "cpp"
     }
 }

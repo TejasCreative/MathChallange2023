@@ -9,6 +9,8 @@
 #include <vector>
 #include <unordered_set>
 #include <random>
+#include <chrono>
+#include <thread>
 
 struct matrix{
     //assuming only movement in cardinal directions and teleporting
@@ -419,11 +421,11 @@ struct matrix{
         coord check;
         for(int i=0;i<4;i++){
             check = c+shift[i];
-            if(i==(forward+2)%4 || (1==forward && rand()%3==0)){
+            if(i==(forward+2)%4 || (i==forward && rand()%1000<200)){
                 continue;
             }
-            if(check.row >= n || check.row <= 0 || check.col >= n || check.col <= 0 || (arr[check.row][check.col]=='.' && rand()%8<6)){
-                // std::cout << "can't place at: " << c << " because " << check << "\n"; 
+            if(check.row >= n || check.row < 0 || check.col >= n || check.col <0 || arr[check.row][check.col]=='.'){
+                // std::cout << " can't place at: " << c << " because " << check << "\n"; 
                 return false;
             }
         }
@@ -447,62 +449,65 @@ struct matrix{
         }
         mf.close();
 
-        int precision = 100000;
-        int probabilityOfIntersection = 10000;
-        int probabilityOfQuadIntersection = 10000;
-        int probabilityOfTurning = 10000;
+        int precision = 1000000;
+        int probabilityOfIntersection = 100000;
+        int probabilityOfQuadIntersection = 40000;
+        int probabilityOfTurning = 110000;
 
-        coord begin(1,rand() % n-8,"123");
+        coord begin(1,rand() % n,"123");
         std::vector<coord> intersections;
         intersections.push_back(begin);
         coord current, next;
-        int i=1,front=0,choiceDirection =0;
+        int i=1,front=0,choiceDirection =0,length=0;
         while(front<intersections.size()){//breadth first
             current = intersections[front];
             i=(int)current.path[choiceDirection]-48;
-            int length=0;
+            length=0;
             while(true){
                 next = current+shift[i];
-                if( next.row <= 0 || next.row >= n || next.col >= n || next.col<=0 || arr[next.row][next.col] == '.'){//if no new directions for some reason...
+                if( next.row <= 0 || next.row >= n-1 || next.col >= n-1 || next.col<=0 || arr[next.row][next.col]=='.'){//if no new directions for some reason...
                     // std::cout << "out of bounds or next is a period\n";
                     break;
                 }
-                if(!checkPlaceability(next, arr, n, i)){
-                    // std::cout << "current is: " << current << "\n";
-                    break;
-                }
-                arr[next.row][next.col]='.';
-                if(rand()%precision < probabilityOfIntersection*(length)){//new intersection or dead end
-                    std::string direction = std::to_string((i+2)%4);
-                    int c = rand() % precision;
-                    if(c<probabilityOfQuadIntersection){
-                        direction = "0123";
-                    }
-                    else{
-                        int whichPaths = rand() % 4;
-                        if(whichPaths==0){
-                            direction+="012";
-                        }
-                        else if(whichPaths==1){
-                            direction+="123";
-                        }
-                        else if(whichPaths==2){
-                            direction+="013";
+                bool canPlace = checkPlaceability(next, arr, n, i);
+                // std::cout << current;
+                if(canPlace){
+                    length++;
+                    arr[next.row][next.col]='.';
+                    if(rand()%precision < probabilityOfIntersection*(length)){//new intersection or dead end
+                        int back = (i+2)%4;
+                        std::string direction = std::to_string(back);
+                        if(rand() % precision<probabilityOfQuadIntersection){
+                            direction = "0123";
                         }
                         else{
-                            direction+="023";
+                            int whichPaths = rand() % 3;
+                            if(whichPaths==0){
+                                direction+=std::to_string((1+back)%4);
+                                direction+=std::to_string((2+back)%4);
+                            }
+                            else if(whichPaths==1){
+                                direction+=std::to_string((1+back)%4);
+                                direction+=std::to_string((3+back)%4);
+                            }
+                            else{
+                                direction+=std::to_string((2+back)%4);
+                                direction+=std::to_string((3+back)%4);
+                            }
                         }
+                        next.path = direction;
+                        // std::cout << " intersection at " << next << "\n";
+                        intersections.push_back(next);
+                        break;
                     }
-                    next.path = direction;
-                    intersections.push_back(next);
-                    // arr[next.row][next.col] = '*';
-                    break;
+                    // std::cout << " continued " << i << "\n";
+                    current = next;
                 }
-                if(rand() % precision < probabilityOfTurning*length){//turning
-                    // arr[next.row][next.col]='t';
-                    i = (i+rand() % 3-1)%4;
+                if(!canPlace || rand() % precision < probabilityOfTurning*length){//turning
+                    i = (i+((rand() % 3)+3))%4;
+                    // std::cout << " turning to " << i << "\n"; 
+                    length=0;
                 }
-                current = next;
                 // mf.open("newMaze.txt");
                 // for(int r=0;r<n;r++){
                 //     for(int c=0;c<n;c++){
@@ -511,9 +516,10 @@ struct matrix{
                 //     mf << "\n";
                 // }
                 // mf.close();
+                // std::chrono::milliseconds duration(60);
+                // std::this_thread::sleep_for(duration);
                 // std::string test;
                 // std::cin >> test;
-                length++;
             }
             choiceDirection++;
             if(choiceDirection>=intersections[front].path.size()){
@@ -524,6 +530,17 @@ struct matrix{
         std::cout << intersections.size() << "\n";
         arr[begin.row][begin.col] = 'A';
         arr[begin.row-1][begin.col] = 'A';
+        std::vector<int> possibleEnds;
+        for(int i=1;i<n-1;i++){
+            if(arr[n-2][i]=='.'){
+                possibleEnds.push_back(i);
+                // std::cout << possibleEnds.back() << "\n";
+            }
+        }
+        coord ending(n-2,possibleEnds[rand() % possibleEnds.size()],"");
+        arr[ending.row][ending.col] = 'Z';
+        arr[ending.row+1][ending.col] = 'Z';
+        
         //label portal pairs
         // for(int j=0;j<portals.size();j++){
         //     at(portals[j].pos).letter = (char)(66+j);
@@ -562,3 +579,48 @@ struct matrix{
 
 
 #endif
+/*
+#############
+##C#F#D#H#J##
+#BA........B#
+##.#.#.#.#.##
+#G.........G#
+##.#.#.#.#.##
+#E.........E#
+##.#.#.#.#.##
+#K.........K#
+##.#.#.#.#.##
+#I........ZI#
+##C#F#D#H#J##
+#############
+
+###########
+##C#F#D#H##
+#BA......B#
+##.#.#.#.##
+#G.......G#
+##.#.#.#.##
+#E.......E#
+##.#.#.#.##
+#I......ZI#
+##C#F#D#H##
+###########
+
+#########
+##C#F#D##
+#BA....B#
+##.#.#.##
+#G.....G#
+##.#.#.##
+#E....ZE#
+##C#F#D##
+#########
+
+#######
+##C#D##
+#BA..B#
+##.#.##
+#E..ZE#
+##C#D##
+#######
+*/
