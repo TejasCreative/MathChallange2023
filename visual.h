@@ -16,6 +16,8 @@
 
 class Visual{
     public:
+        std::vector<coord> shift;
+        coord start;
         Visual(){
             //std::cout << "Visual constructor" << std::endl;
         }
@@ -36,14 +38,40 @@ class Visual{
             output.close();
 
         }
+        void setter(){
+            std::ifstream file{"info.txt"};
+            std::string line;
+            coord temp;
+            for(int i=0;i<4;i++){
+                file >> temp.col >> temp.row;
+                shift.push_back(temp);
+            }
+            file >> start.col >> start.row;
+            file.close();
+            for(int i=0;i<shift.size();i++){
+                std::cout << shift[i] << std::endl;
+            }
+            std::cout << start << std::endl;
+        
+        }
         void draw(std::string path, std::string filename){
+            std::ofstream file{filename};
+            coord temp = start;
+            node* next;
+            //go to each position and make the letter a j startubg at temp
+            for(int i = 0; i < path.size(); i++){
+                
 
+            }
+            
+            file.close();
         }
-        void drawOverview(std::string short_path, std::string long_path, std::string filename){
+        // void drawOverview(std::string short_path, std::string long_path, std::string filename){
 
-        }
+        // }
 
         void visualize(std::string filename){
+            setter();
             std::ifstream file;
             file.open(filename);
             std::string line;
@@ -53,18 +81,13 @@ class Visual{
                 while(file.good()){
                     file >> x;
                     file >> line;
-                    std::cout << x << " " << line << std::endl;
                     lines.emplace_back(x,line);
                 }
             }
             else{
                 std::cout << "File not found" << std::endl;
             }
-            std::cout << "Size of lines: " << lines.size() << std::endl;
             file.close();
-            for(auto i : lines){
-                std::cout << std::get<0>(i) << " " << std::get<1>(i) << std::endl;
-            }
             std::vector<std::tuple<int, std::string> > smallest;
             smallest.emplace_back(lines[0]);
             for(int i=1;i<lines.size();i++){
@@ -75,10 +98,6 @@ class Visual{
                 else if(std::get<0>(lines[i]) == std::get<0>(smallest[0])){
                     smallest.emplace_back(lines[i]);
                 }
-            }
-            std::cout << "Size of smallest: " << smallest.size() << std::endl;
-            for(auto i : smallest){
-                std::cout << std::get<0>(i) << " " << std::get<1>(i) << std::endl;
             }
             std::vector<std::tuple<int, std::string> > longest;
             longest.emplace_back(lines[0]);
@@ -91,19 +110,15 @@ class Visual{
                     longest.emplace_back(lines[i]);
                 }
             }
-            std::cout << "Size of longest: " << longest.size() << std::endl;
-            for(auto i : longest){
-                std::cout << std::get<0>(i) << " " << std::get<1>(i) << std::endl;
-            }
-            replicate("overview.txt");
+            replicate("overview.rtf");
             // drawOverview(smallest,longest, "overview.txt");
 
             //insert code to map on overview
 
             mkdir("Solutions", 0777);
             for(int i = 0; i < lines.size(); i++){
-                replicate("Solutions/Solution_" + std::to_string(i+1) + ".txt");
-                // draw(std::get<1>(lines[i]), "Solutions/Solution_" + std::to_string(i+1) + ".txt");
+                replicate("Solutions/Solution_" + std::to_string(i+1) + ".rtf");
+                draw(std::get<1>(lines[i]), "Solutions/Solution_" + std::to_string(i+1) + ".rtf");
             }
             std::cout << "Visualize complete" << std::endl;
 

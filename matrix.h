@@ -350,7 +350,6 @@ struct matrix{
         coord myPosition = start->pos;
         char c;
         for(int i=0;i<path.size();i++){
-            std::cout << myPosition << " " << path[i] << "\n";
             if(visited.find(myPosition)!=visited.end()){
                 return false;
             }
@@ -377,29 +376,18 @@ struct matrix{
     }
 
     void prepVisual(){
+        for(int i = 0; i < shift.size(); i++){
+            std::cout << shift[i] << "\n";
+        }
+        std::cout << "Start: " << start->pos << "\n";
         std::ofstream mf;
         mf.open("info.txt");
         //write shift vector
         for(int i=0;i<shift.size();i++){
-            mf << shift[i] << "\n";
+            mf << shift[i].col << " " << shift[i].row << "\n";  
         }
-        mf << "\n";
-        //write portals
-        for(int i=0;i<portals.size();i++){
-            mf << portals[i] << "\n";
-        }
-        mf << "\n";
-        //write choices
-        for(int i=0;i<choices.size();i++){
-            mf << choices[i] << "\n";
-        }
-        mf << "\n";
         //write start
-        mf << start->pos << "\n";
-        mf << "\n";
-        //write end
-        mf << end->pos << "\n";
-        mf << "\n";
+        mf << start->pos.col << " " << start->pos.row << "\n";
 
     
     
