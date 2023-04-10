@@ -6,14 +6,14 @@ using namespace std;
 int main(){
     matrix data;
     auto start = chrono::high_resolution_clock::now();
-    data.generateMaze(40);
+    // data.generateMaze(40);
     auto stop = chrono::high_resolution_clock::now();
     auto duration = chrono::duration_cast<chrono::microseconds>(stop-start);
     std::cout << "Generated Maze in " << duration.count() << " microseconds.\n";
 
     int n=0;
     start = chrono::high_resolution_clock::now();
-    data.generate2d("newMaze.txt");
+    data.generate2d("AM_challenge23_input.txt");
     stop = chrono::high_resolution_clock::now();
     duration = chrono::duration_cast<chrono::microseconds>(stop-start);
     std::cout << "Generated Matrix in " << duration.count() << " microseconds.\n";
@@ -23,9 +23,6 @@ int main(){
     stop = chrono::high_resolution_clock::now();
     duration = chrono::duration_cast<chrono::microseconds>(stop-start);
     std::cout << "Found " << data.choices.size() << " choices in " << duration.count() << " microseconds.\n";
-
-    data.writeNodes("newMazeadjacencyList.txt");
-    data.writeMap("newMap.txt");
 
     start = chrono::high_resolution_clock::now();
     n = data.trimGraph(3);
@@ -48,9 +45,11 @@ int main(){
     
     // // data.convertAdMatrix();
     // // data.displayAdjacencyMatrix("adjmatrix.txt");
-    data.writeNodes("newMazeadjacencyList.txt");
-    data.writeMap("newMap.txt");
-    data.writeSolutionPaths("newSolutions!.txt");
+    data.writeNodes("adjacencyList.txt");
+    data.writeMap("map.txt");
+    data.writeSolutionPaths("Solutions!.txt");
+    data.drawSolution(data.bestSolutions[0],"■");
+    data.drawSolution(data.LongestSolutions[0],"■");
     
     return 0;
 }

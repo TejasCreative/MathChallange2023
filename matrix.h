@@ -70,7 +70,7 @@ struct matrix{
             std::getline(mf,line);
             info[row] = new node[cols];
             for(int col=0;col<cols;col++){
-                if(col>=line.length()-1 || line[col]=='#'){
+                if(col>=line.length()-1){
                     line[col]=' ';
                 }
                 else if('A'<line[col] && line[col]<'Z'){
@@ -294,6 +294,7 @@ struct matrix{
         mf << "Choices:\n";
         for(int i=0;i<choices.size();i++){
             mf << at(choices[i]) << "\n";
+            at(choices[i]).letter = '.';
         }
         mf << "\nPortals:\n";
         for(int i=0;i<portals.size();i++){
@@ -306,11 +307,68 @@ struct matrix{
         mf.open(filename);
         for(int r=0;r<rows;r++){
             for(int c=0;c<cols;c++){
+                if(info[r][c].letter==','){
+                    info[r][c].letter='.';
+                }
                 mf << info[r][c].letter;
             }
             mf << "\n";
         }
         mf.close();
+    }
+    void drawSolution(std::string path, std::string character){
+        coord** coloredArray = new coord*[rows];
+        for(int i=0;i<rows;i++){
+            coloredArray[i] = new coord[cols];
+            for(int j=0;j<cols;j++){
+                coloredArray[i][j].row = i;
+                coloredArray[i][j].col = j;
+                coloredArray[i][j].path = info[i][j].letter;
+            }
+        }
+        coord myPosition = start->pos;
+        at(start->pos).letter='A';
+        for(auto step : path){
+            if(step=='4'){
+                coloredArray[myPosition.row][myPosition.col].path = "!";
+                myPosition = searchPortals(myPosition);
+            }
+            else{
+                do{
+                    coloredArray[myPosition.row][myPosition.col].path = "!";
+                    myPosition = myPosition + shift[(int)(step-48)];
+                }while(at(myPosition).letter=='_');
+            }
+        }
+        coloredArray[myPosition.row][myPosition.col].path = "!";
+        for(int r=0;r<rows;r++){
+            for(int c=0;c<cols;c++){
+                if(coloredArray[r][c].path=="!"){
+                    if(info[r][c].letter=='.'){
+                        std::cout << "\033[92m" << character <<"\033[0m";
+                    }
+                    else{
+                        std::cout << "\033[92m" << info[r][c].letter <<"\033[0m";
+                    }
+                }
+                else{
+                    if(info[r][c].letter=='#'){
+                        std::cout << "\033[30m" << character << "\033[0m";//■
+                    }
+                    else if(info[r][c].letter=='.'){
+                        std::cout << "\033[37m" << character << "\033[0m";
+                    }
+                    else{
+                        std ::cout << "\033[37m" << info[r][c].letter << "\033[0m";
+                    }
+                }
+            }
+            std::cout << "\n";
+        }
+        for(int i=0;i<rows;i++){
+            delete[] coloredArray[i];
+        }
+        delete[] coloredArray;
     }
     void displayAdjacencyMatrix(std::string filename){
         std::ofstream mf;
