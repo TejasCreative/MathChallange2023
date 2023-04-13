@@ -23,17 +23,21 @@ class Visual{
         }
         void replicate(std::string filename){
             std::string line;
-            std::ifstream file{"map.txt"};
+            std::ifstream file{"AM_challenge23_input.txt"};
             std::ofstream output{filename};
+            
+            std::cout << filename << std::endl;
             if(file.is_open()){
                 while(file.good()){
                     std::getline(file,line);
-                    output << line << std::endl;
+                    std::cout << line << std::endl;
+                    output << line << "\n";
                 }
             }
             else{
                 std::cout << "File not found" << std::endl;
             }
+            output << "0" << "\n";
             file.close();
             output.close();
 
@@ -58,15 +62,11 @@ class Visual{
             std::ofstream file{filename};
             coord temp = start;
             node* next;
-            //go to each position and make the letter a j startubg at temp
-            for(int i = 0; i < path.size(); i++){
-                
-
-            }
+            vector<vector <int> > positions;
+            int x = start.col;
+            int y = start.row;
             
-            file.close();
-        }
-        // void drawOverview(std::string short_path, std::string long_path, std::string filename){
+            
 
         // }
 
