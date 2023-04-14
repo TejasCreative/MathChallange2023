@@ -1,7 +1,7 @@
 #include "matrix.h"
 #include "coord.h"
 #include "visual.h"
-using namespace std;
+
 
 int main(){
     matrix data;

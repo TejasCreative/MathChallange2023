@@ -1,1 +1,1 @@
-makeAdjacencyMatrix
+using namespace std;
