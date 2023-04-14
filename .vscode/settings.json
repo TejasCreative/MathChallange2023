@@ -72,8 +72,11 @@
         "unordered_map": "cpp",
         "unordered_set": "cpp",
         "filesystem": "cpp",
+        "__tree": "cpp",
+        "map": "cpp"
         "numeric": "cpp",
         "stop_token": "cpp",
         "thread": "cpp"
+
     }
 }

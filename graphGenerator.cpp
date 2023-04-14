@@ -1,5 +1,6 @@
 #include "matrix.h"
 #include "coord.h"
+#include "visual.h"
 #include <chrono>
 using namespace std;
 
@@ -48,8 +49,13 @@ int main(){
     data.writeNodes("adjacencyList.txt");
     data.writeMap("map.txt");
     data.writeSolutionPaths("Solutions!.txt");
-    data.drawSolution(data.bestSolutions[0],"■");
-    data.drawSolution(data.LongestSolutions[0],"■");
-    
+
+    data.writeCleanSolutionsPath("CleanSolutions!.txt");
+    data.checkSolutions();
+    data.prepVisual();
+    Visual v;
+    v.visualize("CleanSolutions!.txt");
+
+
     return 0;
 }

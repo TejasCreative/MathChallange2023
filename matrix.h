@@ -442,7 +442,17 @@ struct matrix{
         }
         mf.close();
     }
+    void writeCleanSolutionsPath(std::string filename){
+        std::ofstream mf;
+        mf.open(filename);
+        for(int i=0;i<solutionPaths.size();i++){
+            mf << solutionPaths[i].size() << "\n";
+            mf << solutionPaths[i] << "\n";
+        }
+        mf.close();
+    }
     bool verify(std::string path){
+        std::cout << "Verifying " << path << "\n";
         visited.clear();
         coord myPosition = start->pos;
         for(int i=0;i<path.size();i++){
@@ -618,6 +628,27 @@ struct matrix{
             delete[] arr[i];
         }
         delete[] arr;
+    }
+
+    void prepVisual(){
+        for(int i = 0; i < shift.size(); i++){
+            std::cout << shift[i] << "\n";
+        }
+        std::cout << "Start: " << start->pos << "\n";
+        std::ofstream mf;
+        mf.open("info.txt");
+        //write shift vector
+        for(int i=0;i<shift.size();i++){
+            mf << shift[i].col << " " << shift[i].row << "\n";  
+        }
+        //write start
+        mf << start->pos.col << " " << start->pos.row << "\n";
+
+        for(int i = 0; i < portals.size(); i++){
+            mf << portals[i].pos.row << " " << portals[i].pos.col << " ";
+            mf<< portals[i].edges[0].row << " " << portals[i].edges[0].col << "\n";
+        }
+    
     }
     ~matrix(){
         if(info!=nullptr){
