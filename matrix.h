@@ -389,7 +389,10 @@ struct matrix{
         //write start
         mf << start->pos.col << " " << start->pos.row << "\n";
 
-    
+        for(int i = 0; i < portals.size(); i++){
+            mf << portals[i].pos.row << " " << portals[i].pos.col << " ";
+            mf<< portals[i].edges[0].row << " " << portals[i].edges[0].col << "\n";
+        }
     
     }
     ~matrix(){
