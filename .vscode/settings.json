@@ -74,5 +74,9 @@
         "filesystem": "cpp",
         "__tree": "cpp",
         "map": "cpp"
+        "numeric": "cpp",
+        "stop_token": "cpp",
+        "thread": "cpp"
+
     }
 }
