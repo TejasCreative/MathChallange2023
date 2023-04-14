@@ -1,1 +1,0 @@
-# MathChallange2023
